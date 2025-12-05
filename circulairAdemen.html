@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Circulaire Ademhaling</title>
+
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #7abf3f;
+    font-family: sans-serif;
+  }
+
+  .controls {
+    position: fixed;
+    top: 30px;
+    text-align: center;
+  }
+  .controls label {
+    display: block;
+    color: white;
+    margin-bottom: 5px;
+  }
+
+  .circle-container {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin-top: 60px;
+  }
+
+  svg {
+    transform: rotate(-90deg); /* Start bovenaan */
+  }
+
+  .breath-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 2em;
+    font-weight: bold;
+    pointer-events: none;
+  }
+
+  .center-timer {
+    position: absolute;
+    top: calc(50% + 45px);
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="controls">
+  <label>Inademen (seconden): <input type="number" id="inInput" value="4" min="1"></label>
+  <label>Uitademen (seconden): <input type="number" id="outInput" value="4" min="1"></label>
+  <label>Timer (minuten): <input type="number" id="timerInput" value="5" min="1"></label>
+  <button id="startBtn">Start</button>
+</div>
+
+<div class="circle-container">
+  <svg width="320" height="320">
+    <circle
+      id="circ"
+      cx="160" cy="160" r="140"
+      stroke="white" stroke-width="10"
+      fill="none"
+      stroke-linecap="round"
+    />
+  </svg>
+
+  <div class="breath-text" id="breathText">IN</div>
+  <div class="center-timer" id="centerTimer">05:00</div>
+</div>
+
+<script>
+const circ = document.getElementById("circ");
+const breathText = document.getElementById("breathText");
+const centerTimer = document.getElementById("centerTimer");
+
+const startBtn = document.getElementById("startBtn");
+const inInput = document.getElementById("inInput");
+const outInput = document.getElementById("outInput");
+const timerInput = document.getElementById("timerInput");
+
+let animationId;
+let totalSeconds;
+let remainingSeconds;
+
+const circumference = 2 * Math.PI * 140;
+circ.style.strokeDasharray = circumference;
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+  const s = (seconds % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function startAnimation() {
+  cancelAnimationFrame(animationId);
+
+  const inTime = parseFloat(inInput.value);
+  const outTime = parseFloat(outInput.value);
+
+  const cycleTime = inTime + outTime;
+
+  totalSeconds = parseInt(timerInput.value) * 60;
+  remainingSeconds = totalSeconds;
+
+  let startTime = null;
+
+  function animate(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsed = (timestamp - startTime) / 1000;
+
+    // Timer
+    const elapsedSeconds = Math.floor(elapsed);
+    remainingSeconds = totalSeconds - elapsedSeconds;
+    if (remainingSeconds < 0) remainingSeconds = 0;
+    centerTimer.textContent = formatTime(remainingSeconds);
+
+    if (remainingSeconds <= 0) return;
+
+    // Progress in cycle (0 → 1)
+    const cycleProgress = (elapsed % cycleTime) / cycleTime;
+
+    let phaseProgress;
+    let offset;
+
+    if (cycleProgress < inTime / cycleTime) {
+      // IN
+      breathText.textContent = "IN";
+      phaseProgress = cycleProgress / (inTime / cycleTime);
+      offset = circumference - circumference * phaseProgress; // 0% → 100%
+    } else {
+      // UIT
+      breathText.textContent = "UIT";
+      phaseProgress = (cycleProgress - inTime / cycleTime) / (outTime / cycleTime);
+      offset = circumference * phaseProgress; // 100% → 0%
+    }
+
+    circ.style.strokeDashoffset = offset;
+    animationId = requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+}
+
+startBtn.addEventListener("click", startAnimation);
+</script>
+</body>
+</html>
+
