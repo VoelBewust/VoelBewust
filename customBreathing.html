@@ -90,26 +90,24 @@
     font-weight: bold;
   }
 
-  .controls button:hover {
-    background-color: #f0f0f0;
+  .hidden {
+    display: none !important;
   }
 
-  .controls button#startBtn {
-      background-color: #6b6bff;
-      color: white;
-  }
-
-  .controls button#startBtn:hover {
-      background-color: #5252ff;
-  }
-
-  .controls button#stopBtn {
-    background-color: #ff6b6b;
-    color: white;
-  }
-
-  .controls button#stopBtn:hover {
-    background-color: #ff5252;
+  #stopBtn {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    background-color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    z-index: 1000;
+    width: 260px;
   }
 </style>
 </head>
@@ -137,10 +135,11 @@
     <input type="number" id="timerInput" value="6" min="1">
   </label>
   <button id="startBtn">Start</button>
-  <button id="stopBtn">Stop</button>
 </div>
 
-<div class="container">
+<button id="stopBtn" class="hidden">Stop</button>
+
+<div class="container" id="container">
   <div class="label-top">IN</div>
   <div class="label-bottom">UIT</div>
   <div class="label-left">VAST</div>
@@ -155,6 +154,8 @@ const line = document.getElementById('line');
 const centerTimer = document.getElementById('centerTimer');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
+const container = document.getElementById('container');
+const controls = document.querySelector('.controls');
 const topInput = document.getElementById('topInput');
 const rightInput = document.getElementById('rightInput');
 const bottomInput = document.getElementById('bottomInput');
@@ -166,7 +167,10 @@ let totalSeconds;
 let remainingSeconds;
 let lastSide = -1;
 
+// Initiële staat: verberg container en stop knop
 line.style.display = "none";
+container.classList.add('hidden');
+stopBtn.classList.add('hidden');
 
 // Creëer een zacht geluid met Web Audio API
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -192,6 +196,11 @@ function playTransitionSound() {
 
 function startAnimation() {
   cancelAnimationFrame(animationId);
+
+  // Verberg controls en start knop, toon container en stop knop
+  controls.classList.add('hidden');
+  container.classList.remove('hidden');
+  stopBtn.classList.remove('hidden');
 
   line.style.display = "";
 
@@ -296,6 +305,11 @@ function stopAnimation() {
   line.style.display = "none";
   lastSide = -1;
   centerTimer.textContent = formatTime(parseInt(timerInput.value) * 60);
+
+  // Verberg container en stop knop, toon controls en start knop
+  container.classList.add('hidden');
+  stopBtn.classList.add('hidden');
+  controls.classList.remove('hidden');
 }
 
 function formatTime(seconds) {
