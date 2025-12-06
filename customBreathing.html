@@ -166,6 +166,7 @@ let animationId;
 let totalSeconds;
 let remainingSeconds;
 let lastSide = -1;
+let endSoundPlayed = false;
 
 // Initiële staat: verberg container en stop knop
 line.style.display = "none";
@@ -194,6 +195,37 @@ function playTransitionSound() {
   oscillator.stop(audioContext.currentTime + 0.2);
 }
 
+function playEndSound() {
+  // Speel een dubbele ping bij einde
+  const oscillator1 = audioContext.createOscillator();
+  const oscillator2 = audioContext.createOscillator();
+  const gainNode1 = audioContext.createGain();
+  const gainNode2 = audioContext.createGain();
+
+  oscillator1.connect(gainNode1);
+  oscillator2.connect(gainNode2);
+  gainNode1.connect(audioContext.destination);
+  gainNode2.connect(audioContext.destination);
+
+  // Eerste ping (hoger, 880Hz = A5)
+  oscillator1.frequency.value = 880;
+  oscillator1.type = 'sine';
+  gainNode1.gain.setValueAtTime(0.15, audioContext.currentTime);
+  gainNode1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+  // Tweede ping (lager, 660Hz = E5) - iets later
+  oscillator2.frequency.value = 660;
+  oscillator2.type = 'sine';
+  gainNode2.gain.setValueAtTime(0, audioContext.currentTime);
+  gainNode2.gain.setValueAtTime(0.15, audioContext.currentTime + 0.15);
+  gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+  oscillator1.start(audioContext.currentTime);
+  oscillator1.stop(audioContext.currentTime + 0.3);
+  oscillator2.start(audioContext.currentTime + 0.15);
+  oscillator2.stop(audioContext.currentTime + 0.5);
+}
+
 function startAnimation() {
   cancelAnimationFrame(animationId);
 
@@ -212,6 +244,7 @@ function startAnimation() {
 
   totalSeconds = parseInt(timerInput.value) * 60;
   remainingSeconds = totalSeconds;
+  endSoundPlayed = false;
 
   centerTimer.textContent = formatTime(remainingSeconds);
 
@@ -294,6 +327,12 @@ function startAnimation() {
     if (remainingSeconds < 0) remainingSeconds = 0;
     centerTimer.textContent = formatTime(remainingSeconds);
 
+    // Speel eindgeluid als tijd op is
+    if (remainingSeconds === 0 && !endSoundPlayed) {
+      playEndSound();
+      endSoundPlayed = true;
+    }
+
     animationId = requestAnimationFrame(animate);
   }
 
@@ -304,6 +343,7 @@ function stopAnimation() {
   cancelAnimationFrame(animationId);
   line.style.display = "none";
   lastSide = -1;
+  endSoundPlayed = false;
   centerTimer.textContent = formatTime(parseInt(timerInput.value) * 60);
 
   // Verberg container en stop knop, toon controls en start knop
