@@ -327,10 +327,12 @@ function startAnimation() {
     if (remainingSeconds < 0) remainingSeconds = 0;
     centerTimer.textContent = formatTime(remainingSeconds);
 
-    // Speel eindgeluid als tijd op is
+    // Speel eindgeluid en stop als tijd op is
     if (remainingSeconds === 0 && !endSoundPlayed) {
       playEndSound();
       endSoundPlayed = true;
+      stopAnimation();
+      return;
     }
 
     animationId = requestAnimationFrame(animate);
