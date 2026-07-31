@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Calm Down</title>
+
+<style>
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+    cursor: none;
+}
+
+
+/*
+    Achtergrond
+*/
+
+#achtergrond {
+
+    position: fixed;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            45deg,
+            black,
+            white,
+            black,
+            #ff006e,
+            black,
+            #00ffff,
+            black
+        );
+
+    background-size: 400% 400%;
+
+    animation:
+        achtergrondPulse 12s ease-in-out infinite;
+
+    filter:
+        contrast(250%);
+
+}
+
+
+
+@keyframes achtergrondPulse {
+
+    0% {
+        background-position:0% 50%;
+        filter:
+            brightness(0.4)
+            contrast(250%);
+    }
+
+
+    50% {
+        background-position:100% 50%;
+        filter:
+            brightness(1.4)
+            contrast(350%);
+    }
+
+
+    100% {
+        background-position:0% 50%;
+        filter:
+            brightness(0.4)
+            contrast(250%);
+    }
+
+}
+
+
+
+/*
+    Objecten
+*/
+
+.vorm {
+
+    position:absolute;
+
+    opacity:0.8;
+
+    mix-blend-mode:screen;
+
+    filter:
+        contrast(250%)
+        brightness(150%);
+
+    animation:
+        zweef 20s infinite ease-in-out;
+
+}
+
+
+
+.cirkel {
+    border-radius:50%;
+}
+
+
+
+.vierkant {
+    border-radius:20px;
+}
+
+
+
+.driehoek {
+
+    width:0;
+    height:0;
+
+    border-left:
+        70px solid transparent;
+
+    border-right:
+        70px solid transparent;
+
+    border-bottom:
+        120px solid white;
+
+}
+
+
+
+@keyframes zweef {
+
+
+    0% {
+
+        translate:
+            0 0;
+
+        rotate:
+            0deg;
+
+        scale:
+            1;
+
+    }
+
+
+    25% {
+
+        translate:
+            120px -100px;
+
+        rotate:
+            90deg;
+
+        scale:
+            1.25;
+
+    }
+
+
+    50% {
+
+        translate:
+            -80px 100px;
+
+        rotate:
+            180deg;
+
+        scale:
+            0.8;
+
+    }
+
+
+    75% {
+
+        translate:
+            100px 50px;
+
+        rotate:
+            270deg;
+
+        scale:
+            1.15;
+
+    }
+
+
+    100% {
+
+        translate:
+            0 0;
+
+        rotate:
+            360deg;
+
+        scale:
+            1;
+
+    }
+
+}
+
+
+
+
+/*
+    Muislicht
+*/
+
+#cursor {
+
+    position:absolute;
+
+    width:60px;
+    height:60px;
+
+    border-radius:50%;
+
+    background:white;
+
+    mix-blend-mode:difference;
+
+    pointer-events:none;
+
+    transform:
+        translate(-50%,-50%);
+
+    opacity:0.8;
+
+}
+
+
+
+/*
+    Status
+*/
+
+#status {
+
+    position:fixed;
+
+    bottom:20px;
+
+    left:50%;
+
+    transform:
+        translateX(-50%);
+
+    color:white;
+
+    font-family:
+        Arial,sans-serif;
+
+    font-size:16px;
+
+    background:
+        rgba(0,0,0,0.35);
+
+    padding:
+        10px 25px;
+
+    border-radius:30px;
+
+    backdrop-filter:
+        blur(10px);
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div id="achtergrond"></div>
+
+
+<div class="vorm cirkel"
+style="
+width:120px;
+height:120px;
+background:white;
+left:10%;
+top:20%;
+animation-duration:18s;">
+</div>
+
+
+<div class="vorm vierkant"
+style="
+width:100px;
+height:100px;
+background:#00ffff;
+left:70%;
+top:15%;
+animation-duration:22s;">
+</div>
+
+
+<div class="vorm cirkel"
+style="
+width:180px;
+height:180px;
+background:#ff00ff;
+left:45%;
+top:65%;
+animation-duration:26s;">
+</div>
+
+
+<div class="vorm driehoek"
+style="
+left:25%;
+top:60%;
+animation-duration:20s;">
+</div>
+
+
+<div class="vorm vierkant"
+style="
+width:80px;
+height:80px;
+background:#ffff00;
+left:80%;
+top:70%;
+animation-duration:16s;">
+</div>
+
+
+
+<div id="cursor"></div>
+
+
+<div id="status">
+Tik om scherm actief te houden
+</div>
+
+
+
+
+<script>
+
+
+/*
+    Muis reageert alleen op cursor + objecten
+*/
+
+const cursor =
+document.getElementById("cursor");
+
+
+const vormen =
+document.querySelectorAll(".vorm");
+
+
+
+document.addEventListener(
+"mousemove",
+(e)=>{
+
+
+    const x =
+    e.clientX /
+    window.innerWidth -
+    0.5;
+
+
+    const y =
+    e.clientY /
+    window.innerHeight -
+    0.5;
+
+
+
+    cursor.style.left =
+        e.clientX+"px";
+
+
+    cursor.style.top =
+        e.clientY+"px";
+
+
+
+    vormen.forEach(
+        (vorm,index)=>{
+
+
+            const factor =
+                (index+1)*15;
+
+
+            vorm.style.marginLeft =
+                (x*factor)+"px";
+
+
+            vorm.style.marginTop =
+                (y*factor)+"px";
+
+
+        }
+    );
+
+});
+
+
+
+
+/*
+    Wake Lock
+*/
+
+let wakeLock = null;
+
+
+async function activeerWakeLock(){
+
+    try {
+
+        if(
+            "wakeLock" in navigator
+        ){
+
+            wakeLock =
+            await navigator.wakeLock
+            .request("screen");
+
+
+            document.getElementById(
+                "status"
+            ).innerHTML =
+            "Scherm actief gehouden ✓";
+
+        }
+
+    }
+    catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+
+document.addEventListener(
+"click",
+activeerWakeLock,
+{
+    once:true
+});
+
+
+document.addEventListener(
+"touchstart",
+activeerWakeLock,
+{
+    once:true
+});
+
+
+
+document.addEventListener(
+"visibilitychange",
+async()=>{
+
+    if(
+        wakeLock &&
+        document.visibilityState==="visible"
+    ){
+
+        await activeerWakeLock();
+
+    }
+
+});
+
+
+</script>
+
+
+</body>
+</html>
